@@ -10,12 +10,17 @@ as a fully offline, self-contained bundle for Linux and Windows targets
 
 pi's upstream **already publishes standalone, Bun-compiled release archives** for every relevant target. They are self-contained single executables (~41–44 MB compressed / ~103–111 MB unpacked) that need **no Node.js, npm, or JS libraries** on the target. For an offline bundle, take those archives + `SHA256SUMS` and add a small checksum-verifying installer script.
 
-| Target | Official artifact | Runs on |
-|---|---|---|
-| Linux x64 | `pi-linux-x64.tar.gz` | glibc ≥ 2.17 (CentOS 7+), kernel ≥ 3.10, SSE4.2 CPU |
-| Linux arm64 | `pi-linux-arm64.tar.gz` | same floor |
-| Windows x64 | `pi-windows-x64.zip` | Windows 10 / Server 2016+ |
-| Windows arm64 | `pi-windows-arm64.zip` | Windows 10+ |
+Direct download links for **v1.3.0** (all assets also listed on the [releases page](https://github.com/earendil-works/pi/releases/latest)):
+
+| Target | Official artifact (direct link) | Size | Runs on |
+|---|---|---|---|
+| Linux x64 | [`pi-linux-x64.tar.gz`](https://github.com/earendil-works/pi/releases/download/v1.3.0/pi-linux-x64.tar.gz) | 41 MB | glibc ≥ 2.17 (CentOS 7+), kernel ≥ 3.10, SSE4.2 CPU |
+| Linux arm64 | [`pi-linux-arm64.tar.gz`](https://github.com/earendil-works/pi/releases/download/v1.3.0/pi-linux-arm64.tar.gz) | — | same floor |
+| Windows x64 | [`pi-windows-x64.zip`](https://github.com/earendil-works/pi/releases/download/v1.3.0/pi-windows-x64.zip) | 44 MB | Windows 10 / Server 2016+ |
+| Windows arm64 | [`pi-windows-arm64.zip`](https://github.com/earendil-works/pi/releases/download/v1.3.0/pi-windows-arm64.zip) | — | Windows 10+ |
+| macOS x64 (bonus) | [`pi-darwin-x64.tar.gz`](https://github.com/earendil-works/pi/releases/download/v1.3.0/pi-darwin-x64.tar.gz) | — | macOS 13+ |
+| macOS arm64 (bonus) | [`pi-darwin-arm64.tar.gz`](https://github.com/earendil-works/pi/releases/download/v1.3.0/pi-darwin-arm64.tar.gz) | — | macOS 13+ |
+| Checksums | [`SHA256SUMS`](https://github.com/earendil-works/pi/releases/download/v1.3.0/SHA256SUMS) | — | verify before installing |
 
 The glibc floor was verified directly on the shipped binary (`objdump -T` → max `GLIBC_2.17`; only `libc`, `ld-linux`, `libpthread`, `libdl`, `libm` needed).
 
