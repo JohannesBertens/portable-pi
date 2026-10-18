@@ -58,17 +58,49 @@ Expand-Archive pi-windows-x64.zip -DestinationPath "$env:LOCALAPPDATA\pi"
 
 ## Interactive container (example Dockerfile + run script)
 
-Verified example for running pi in a rootless podman container on Fedora, wired to local
-vLLM / llama.cpp endpoints with everything staying on the host/LAN — built for restricted
-environments (no registry, no npm; image transfers via `podman save/load`):
+**[Full guide + verified networking matrix → docker/README.md](docker/README.md)**
+
+A verified example for running pi **interactively in a rootless podman container on Fedora**, wired to local vLLM / llama.cpp endpoints so all LLM traffic stays on the host/LAN. Built for restricted environments: no Node, no npm, no registry access at run time — the offline Bun-compiled pi binary is baked into the image, and the finished image transfers as a single tar via `podman save/load`.
+
+### Files
+
+| File | Purpose |
+|---|---|
+| [`docker/Dockerfile`](docker/Dockerfile) | `debian:bookworm-slim` + git/ripgrep/procps + the offline pi release bundle; no Node anywhere |
+| [`docker/entrypoint.sh`](docker/entrypoint.sh) | generates a clean `models.json` + `settings.json` from `PI_LLM_*` env vars, probes the endpoint, then execs pi |
+| [`docker/pi-run.sh`](docker/pi-run.sh) | host wrapper: `build \| run \| shell \| print \| save \| load`; SELinux `:Z` mounts, named volume for sessions/auth, tty-aware `-it` |
+| [`docker/README.md`](docker/README.md) | env-var table, networking matrix, Fedora notes, verification log |
+
+### Usage
 
 ```bash
-cd docker && ./pi-run.sh build && ./pi-run.sh save pi-interactive.tar   # connected machine
-# ... carry the tar over, then on the restricted machine:
-PI_LLM_BASE_URL=http://host.containers.internal:8080/v1 PI_LLM_MODEL=<id> ./pi-run.sh
+# once, on a connected machine:
+cd docker
+curl -sLO https://github.com/earendil-works/pi/releases/download/v1.3.0/pi-linux-x64.tar.gz
+./pi-run.sh build && ./pi-run.sh save pi-interactive.tar    # carry this tar into the restricted env
+./pi-run.sh load pi-interactive.tar                        # there
+
+# then, in your project dir on the restricted machine:
+PI_LLM_BASE_URL=http://host.containers.internal:8080/v1 \   # llama.cpp on the same host
+PI_LLM_MODEL=halogen-qwen3.8-flash-next \
+PI_LLM_THINKING_FORMAT=qwen-chat-template PI_LLM_NO_DEVELOPER_ROLE=1 ./pi-run.sh
+
+PI_LLM_BASE_URL=http://192.168.1.247:8000/v1 ./pi-run.sh    # vLLM on another LAN machine
+PI_NETWORK=host PI_LLM_BASE_URL=http://127.0.0.1:8080/v1 ./pi-run.sh   # host networking
 ```
 
-Details, env vars, and the verified networking matrix: **[docker/README.md](docker/README.md)**.
+### Reaching the LLM server from inside the container (verified)
+
+| Server location | URL that works |
+|---|---|
+| Same host (bridge network) | `http://host.containers.internal:<port>/v1` |
+| Same host (`PI_NETWORK=host`) | `http://127.0.0.1:<port>/v1` |
+| Another LAN machine | `http://<lan-ip>:<port>/v1` (e.g. `192.168.1.247:8000`) |
+| ❌ loopback/LAN-IP of the host itself via bridge | refused — use `host.containers.internal` or host networking |
+
+### Verified end-to-end (Fedora, rootless podman 5.8.7, pi 1.3.0)
+
+1. ✅ Clean `podman build` (offline binary baked in) · 2. ✅ `pi --version` in clean container · 3. ✅ generated config = valid JSON · 4. ✅ e2e → vLLM over bridge · 5. ✅ e2e → llama.cpp via `host.containers.internal` · 6. ✅ workspace write-through with correct host ownership · 7. ✅ config/sessions persist across `--rm` runs · 8. ✅ interactive TUI renders through the container (alt-screen, mouse, themes)
 
 ## Runtime caveats on offline targets
 
