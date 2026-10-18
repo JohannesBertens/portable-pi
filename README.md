@@ -56,6 +56,20 @@ Expand-Archive pi-windows-x64.zip -DestinationPath "$env:LOCALAPPDATA\pi"
 5. **⚠️ pkg / @yao-pkg** — deprecated upstream (`vercel/pkg` archived); Node 22 cross-compile regression; snapshot-FS fights pi's asset resolution.
 6. **❌ deno compile / nexe / boxednode / caxa** — wrong runtime, dormant, or strictly worse than 1–3.
 
+## Interactive container (example Dockerfile + run script)
+
+Verified example for running pi in a rootless podman container on Fedora, wired to local
+vLLM / llama.cpp endpoints with everything staying on the host/LAN — built for restricted
+environments (no registry, no npm; image transfers via `podman save/load`):
+
+```bash
+cd docker && ./pi-run.sh build && ./pi-run.sh save pi-interactive.tar   # connected machine
+# ... carry the tar over, then on the restricted machine:
+PI_LLM_BASE_URL=http://host.containers.internal:8080/v1 PI_LLM_MODEL=<id> ./pi-run.sh
+```
+
+Details, env vars, and the verified networking matrix: **[docker/README.md](docker/README.md)**.
+
 ## Runtime caveats on offline targets
 
 - **"Offline install" ≠ "offline operation"** — pi needs LLM endpoints (or local llama.cpp / OpenAI-compatible servers) at runtime.

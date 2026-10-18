@@ -1,0 +1,8 @@
+# build inputs (downloaded, not committed)
+docker/pi-linux-*.tar.gz
+docker/pi-linux-*/
+docker/*.tar
+
+# scratch
+docker/.ws-test/
+/tmp/
