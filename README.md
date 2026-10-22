@@ -40,6 +40,14 @@ Expand-Archive pi-windows-x64.zip -DestinationPath "$env:LOCALAPPDATA\pi"
 & "$env:LOCALAPPDATA\pi\pi\pi.exe" --version
 ```
 
+## Also: portable GitHub Copilot CLI
+
+GitHub Copilot CLI ships the same kind of standalone single-executable archives
+(Windows zip/msi, Linux glibc + musl, macOS). With `COPILOT_OFFLINE=true` it runs
+against a local vLLM/llama.cpp/Ollama server with no GitHub login (verified v1.0.103
+→ local vLLM, including tool calls). For the Windows install and local-model setup, see
+**[docs/portable-copilot.md](docs/portable-copilot.md)**.
+
 ## Why the official binaries are the right answer
 
 - The pi codebase has **first-class "bun-binary" support** (`isBunBinary` in `packages/coding-agent/src/config.ts`): themes, docs, HTML-export templates, and the Photon WASM resolve next to the executable; the QuickJS WASM is embedded inside the binary; both worker threads are explicit compile entrypoints.
