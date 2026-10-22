@@ -7,7 +7,7 @@
 # - Build context must contain pi-linux-x64.tar.gz (download once, ~41 MB).
 #   For arm64 hosts use pi-linux-arm64.tar.gz and change the COPY line.
 #
-# Build:  podman build -t pi-interactive:1.3.0 .
+# Build:  podman build -t pi-interactive:1.4.0 .
 
 FROM debian:bookworm-slim
 

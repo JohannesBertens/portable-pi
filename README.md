@@ -4,23 +4,23 @@ Research and tooling for distributing the [pi coding agent](https://github.com/e
 as a fully offline, self-contained bundle for Linux and Windows targets
 (no Node.js, npm, or JS libraries required on the target machine).
 
-**Full research:** [docs/offline-bundling-research.md](docs/offline-bundling-research.md) (pi v1.3.0, verified against the shipped artifacts and upstream source)
+**Full research:** [docs/offline-bundling-research.md](docs/offline-bundling-research.md) (investigated on pi v1.3.0; release artifacts re-verified on v1.4.0)
 
 ## TL;DR — recommendation
 
 pi's upstream **already publishes standalone, Bun-compiled release archives** for every relevant target. They are self-contained single executables (~41–44 MB compressed / ~103–111 MB unpacked) that need **no Node.js, npm, or JS libraries** on the target. For an offline bundle, take those archives + `SHA256SUMS` and add a small checksum-verifying installer script.
 
-Direct download links for **v1.3.0** (all assets also listed on the [releases page](https://github.com/earendil-works/pi/releases/latest)):
+Direct download links for **v1.4.0** (all assets also listed on the [releases page](https://github.com/earendil-works/pi/releases/latest)):
 
 | Target | Official artifact (direct link) | Size | Runs on |
 |---|---|---|---|
-| Linux x64 | [`pi-linux-x64.tar.gz`](https://github.com/earendil-works/pi/releases/download/v1.3.0/pi-linux-x64.tar.gz) | 41 MB | glibc ≥ 2.17 (CentOS 7+), kernel ≥ 3.10, SSE4.2 CPU |
-| Linux arm64 | [`pi-linux-arm64.tar.gz`](https://github.com/earendil-works/pi/releases/download/v1.3.0/pi-linux-arm64.tar.gz) | — | same floor |
-| Windows x64 | [`pi-windows-x64.zip`](https://github.com/earendil-works/pi/releases/download/v1.3.0/pi-windows-x64.zip) | 44 MB | Windows 10 / Server 2016+ |
-| Windows arm64 | [`pi-windows-arm64.zip`](https://github.com/earendil-works/pi/releases/download/v1.3.0/pi-windows-arm64.zip) | — | Windows 10+ |
-| macOS x64 (bonus) | [`pi-darwin-x64.tar.gz`](https://github.com/earendil-works/pi/releases/download/v1.3.0/pi-darwin-x64.tar.gz) | — | macOS 13+ |
-| macOS arm64 (bonus) | [`pi-darwin-arm64.tar.gz`](https://github.com/earendil-works/pi/releases/download/v1.3.0/pi-darwin-arm64.tar.gz) | — | macOS 13+ |
-| Checksums | [`SHA256SUMS`](https://github.com/earendil-works/pi/releases/download/v1.3.0/SHA256SUMS) | — | verify before installing |
+| Linux x64 | [`pi-linux-x64.tar.gz`](https://github.com/earendil-works/pi/releases/download/v1.4.0/pi-linux-x64.tar.gz) | 41 MB | glibc ≥ 2.17 (CentOS 7+), kernel ≥ 3.10, SSE4.2 CPU |
+| Linux arm64 | [`pi-linux-arm64.tar.gz`](https://github.com/earendil-works/pi/releases/download/v1.4.0/pi-linux-arm64.tar.gz) | — | same floor |
+| Windows x64 | [`pi-windows-x64.zip`](https://github.com/earendil-works/pi/releases/download/v1.4.0/pi-windows-x64.zip) | 44 MB | Windows 10 / Server 2016+ |
+| Windows arm64 | [`pi-windows-arm64.zip`](https://github.com/earendil-works/pi/releases/download/v1.4.0/pi-windows-arm64.zip) | — | Windows 10+ |
+| macOS x64 (bonus) | [`pi-darwin-x64.tar.gz`](https://github.com/earendil-works/pi/releases/download/v1.4.0/pi-darwin-x64.tar.gz) | — | macOS 13+ |
+| macOS arm64 (bonus) | [`pi-darwin-arm64.tar.gz`](https://github.com/earendil-works/pi/releases/download/v1.4.0/pi-darwin-arm64.tar.gz) | — | macOS 13+ |
+| Checksums | [`SHA256SUMS`](https://github.com/earendil-works/pi/releases/download/v1.4.0/SHA256SUMS) | — | verify before installing |
 
 The glibc floor was verified directly on the shipped binary (`objdump -T` → max `GLIBC_2.17`; only `libc`, `ld-linux`, `libpthread`, `libdl`, `libm` needed).
 
@@ -31,7 +31,7 @@ The glibc floor was verified directly on the shipped binary (`objdump -T` → ma
 sha256sum -c SHA256SUMS --ignore-missing      # verify first
 tar xzf pi-linux-x64.tar.gz -C "$HOME/.local/share/"
 ln -sf "$HOME/.local/share/pi/pi" "$HOME/.local/bin/pi"
-pi --version                                   # → 1.3.0, no node anywhere
+pi --version                                   # → 1.4.0, no node anywhere
 ```
 
 ```powershell
@@ -76,7 +76,7 @@ A verified example for running pi **interactively in a rootless podman container
 ```bash
 # once, on a connected machine:
 cd docker
-curl -sLO https://github.com/earendil-works/pi/releases/download/v1.3.0/pi-linux-x64.tar.gz
+curl -sLO https://github.com/earendil-works/pi/releases/download/v1.4.0/pi-linux-x64.tar.gz
 ./pi-run.sh build && ./pi-run.sh save pi-interactive.tar    # carry this tar into the restricted env
 ./pi-run.sh load pi-interactive.tar                        # there
 
@@ -98,13 +98,13 @@ PI_NETWORK=host PI_LLM_BASE_URL=http://127.0.0.1:8080/v1 ./pi-run.sh   # host ne
 | Another LAN machine | `http://<lan-ip>:<port>/v1` (e.g. `192.168.1.247:8000`) |
 | ❌ loopback/LAN-IP of the host itself via bridge | refused — use `host.containers.internal` or host networking |
 
-### Verified end-to-end (Fedora, rootless podman 5.8.7, pi 1.3.0)
+### Verified end-to-end (Fedora, rootless podman 5.8.7, pi 1.3.0; 1, 2, 4 re-run on 1.4.0)
 
 1. ✅ Clean `podman build` (offline binary baked in) · 2. ✅ `pi --version` in clean container · 3. ✅ generated config = valid JSON · 4. ✅ e2e → vLLM over bridge · 5. ✅ e2e → llama.cpp via `host.containers.internal` · 6. ✅ workspace write-through with correct host ownership · 7. ✅ config/sessions persist across `--rm` runs · 8. ✅ interactive TUI renders through the container (alt-screen, mouse, themes)
 
 ## Runtime caveats on offline targets
 
-- **"Offline install" ≠ "offline operation"** — pi needs LLM endpoints (or local llama.cpp / OpenAI-compatible servers) at runtime.
+- **"Offline install" ≠ "offline operation"** — pi needs LLM endpoints (or local llama.cpp / OpenAI-compatible servers) at runtime. **`models.json` examples for vLLM and llama.cpp: [docs/models-json.md](docs/models-json.md).**
 - **Windows needs Git Bash** for the `bash` tool (bundle [Portable Git](https://git-scm.com/download/win) and set `shellPath` for fully offline hosts); `pi.exe` is unsigned → SmartScreen may warn on first run.
 - Extensions with their own npm dependencies install deps on demand — vendor their `node_modules` into the kit or avoid them air-gapped.
 - Set `PI_TELEMETRY=0` on air-gapped machines (install telemetry defaults on).

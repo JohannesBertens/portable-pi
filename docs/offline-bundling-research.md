@@ -2,7 +2,9 @@
 
 **Goal:** distribute the pi coding agent so it can be installed on Linux and Windows machines that have **no Node.js, no npm, and no JS libraries** available, and no network access at install time.
 
-**Date:** 2025-10-18 · **pi version investigated:** 1.3.0 (`@earendil-works/pi-coding-agent`)
+**Date:** 2026-10-18 · **pi version investigated:** 1.3.0 (`@earendil-works/pi-coding-agent`)
+
+**Re-verified 2026-10-22 against v1.4.0:** same release asset set and archive layout; `pi-linux-x64.tar.gz` 41 MB, checksum OK, max `GLIBC_2.17`; `pi --version` → `1.4.0` with no network and no Node. No packaging changes in the v1.4.0 release notes. Findings below still apply.
 
 ---
 
@@ -48,7 +50,7 @@
 
 1. **npm**: `npm install -g --ignore-scripts @earendil-works/pi-coding-agent` — requires Node 22.19+ on the target. ❌ offline-unfriendly.
 2. **Managed installer** (`curl -fsSL https://pi.dev/install.sh | sh`): installs to `~/.pi/agent/install/releases/<ver>/node_modules` + launcher shim `~/.pi/agent/bin/pi`; installs/downloads Node.js itself if missing. ❌ needs network (but see §5.C — its layout can be replicated offline).
-3. **GitHub release binaries** ✅ — `https://github.com/earendil-works/pi/releases/download/v1.3.0/…`:
+3. **GitHub release binaries** ✅ — `https://github.com/earendil-works/pi/releases/download/v1.4.0/…`:
    - `pi-linux-x64.tar.gz` (41 MB), `pi-linux-arm64.tar.gz`
    - `pi-windows-x64.zip` (44 MB), `pi-windows-arm64.zip`
    - `pi-darwin-x64/arm64.tar.gz`
@@ -124,7 +126,7 @@
 
 ### D. ⚠️ Node.js Single Executable Applications (SEA)
 
-State (nodejs.org docs, Oct 2025): `node --build-sea` exists (v25.5+; config-only workflow since 20.x + postject); CJS **and** ESM main supported; assets via `sea.getAsset*`; experimental **VFS** (`useVfs`, v26.9, stability 1.0 "Early development") finally allows `fs`-style reads and relative `require` from the mount.
+State (nodejs.org docs, Oct 2026): `node --build-sea` exists (v25.5+; config-only workflow since 20.x + postject); CJS **and** ESM main supported; assets via `sea.getAsset*`; experimental **VFS** (`useVfs`, v26.9, stability 1.0 "Early development") finally allows `fs`-style reads and relative `require` from the mount.
 
 Why it's a poor fit for pi **today**:
 - **Native addons cannot load from the VFS** — must be extracted to a temp file and `process.dlopen()`-ed; pi-tui's helper would need code changes.
@@ -242,7 +244,7 @@ Expand-Archive $zip -DestinationPath $InstallDir -Force
 
 ```bash
 # official binary works standalone, no node required:
-curl -sLO https://github.com/earendil-works/pi/releases/download/v1.3.0/pi-linux-x64.tar.gz
+curl -sLO https://github.com/earendil-works/pi/releases/download/v1.4.0/pi-linux-x64.tar.gz
 tar xzf pi-linux-x64.tar.gz && ./pi/pi --version        # → 1.3.0
 
 # glibc floor of the shipped binary:

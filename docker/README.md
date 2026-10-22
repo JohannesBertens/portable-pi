@@ -10,7 +10,7 @@ Designed for restricted environments:
 - All LLM traffic stays on the host / LAN.
 
 Everything below was verified end-to-end on Fedora (rootless podman 5.8.7,
-pi 1.3.0) against a real vLLM server and a real llama.cpp server — see
+pi 1.3.0; build, `--version` and vLLM re-run on 1.4.0) against a real vLLM server and a real llama.cpp server — see
 "Verified" at the bottom.
 
 ## Files
@@ -25,8 +25,8 @@ pi 1.3.0) against a real vLLM server and a real llama.cpp server — see
 
 ```bash
 # release archive must sit next to the Dockerfile (gitignored):
-curl -sLO https://github.com/earendil-works/pi/releases/download/v1.3.0/pi-linux-x64.tar.gz
-./pi-run.sh build                      # -> localhost/pi-interactive:1.3.0
+curl -sLO https://github.com/earendil-works/pi/releases/download/v1.4.0/pi-linux-x64.tar.gz
+./pi-run.sh build                      # -> localhost/pi-interactive:1.4.0
 ```
 
 For arm64 hosts, use `pi-linux-arm64.tar.gz` and adjust the `COPY` line.
@@ -111,7 +111,7 @@ Debug shell: `./pi-run.sh shell` (add `-c '<cmd>'` to run a command).
   [containerization doc](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/containerization.md)
   if you need managed sandboxes or credential proxies.
 
-## Verified (2025-10-18, Fedora host, podman 5.8.7)
+## Verified (2026-10-18, Fedora host, podman 5.8.7)
 
 1. Clean `podman build` from the Dockerfile (offline binary baked in, `--version` check at build time)
 2. Clean container: `pi --version` → `1.3.0`
@@ -121,3 +121,6 @@ Debug shell: `./pi-run.sh shell` (add `-c '<cmd>'` to run a command).
 6. Workspace write-through: file created in `/workspace` lands on host owned by the invoking user
 7. Named volume: config persists across `--rm` runs (`using existing config ...`)
 8. Interactive TUI renders through the container under a pty (alt-screen, mouse mode, themes)
+
+Re-run 2026-10-22 on pi 1.4.0: steps 1, 2 (`→ 1.4.0`) and 4 (`CLEAN-VLLM-140-OK`) pass. The llama.cpp step was not re-run because no server was up.
+Hand-written `models.json` for vLLM / llama.cpp (without the container): [../docs/models-json.md](../docs/models-json.md).

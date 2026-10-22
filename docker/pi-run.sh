@@ -20,10 +20,10 @@
 #   PI_LLM_NO_DEVELOPER_ROLE 1 for llama.cpp servers that reject the developer role
 #   PI_LLM_CONTEXT_WINDOW    default 262144 | PI_LLM_MAX_TOKENS default 8192
 #   PI_NETWORK               bridge (default) or host
-#   PI_IMAGE                 image tag (default localhost/pi-interactive:1.3.0)
+#   PI_IMAGE                 image tag (default localhost/pi-interactive:1.4.0)
 set -euo pipefail
 
-IMAGE="${PI_IMAGE:-localhost/pi-interactive:1.3.0}"
+IMAGE="${PI_IMAGE:-localhost/pi-interactive:1.4.0}"
 NETWORK="${PI_NETWORK:-bridge}"
 
 cmd="${1:-run}"; shift || true
