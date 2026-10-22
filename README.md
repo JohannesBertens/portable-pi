@@ -89,6 +89,19 @@ PI_LLM_BASE_URL=http://192.168.1.247:8000/v1 ./pi-run.sh    # vLLM on another LA
 PI_NETWORK=host PI_LLM_BASE_URL=http://127.0.0.1:8080/v1 ./pi-run.sh   # host networking
 ```
 
+**Using Docker instead of podman** (`pi-run.sh` is podman-only; [details](docker/README.md#plain-docker-no-wrapper)):
+
+```bash
+cd docker && docker build -t pi-interactive:1.4.0 .
+docker save -o pi-interactive.tar pi-interactive:1.4.0      # carry over, then: docker load -i pi-interactive.tar
+
+cd /path/to/project
+docker run --rm -it --init --add-host=host.docker.internal:host-gateway \
+  -v "$PWD":/workspace -v pi-agent-home:/root/.pi/agent \
+  -e PI_LLM_BASE_URL=http://host.docker.internal:8080/v1 -e PI_LLM_MODEL=<model-id> \
+  pi-interactive:1.4.0
+```
+
 ### Reaching the LLM server from inside the container (verified)
 
 | Server location | URL that works |

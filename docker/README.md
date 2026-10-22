@@ -65,6 +65,39 @@ PI_LLM_THINKING_FORMAT=qwen-chat-template \
 One-shot: `./pi-run.sh print "summarize this repo"`.
 Debug shell: `./pi-run.sh shell` (add `-c '<cmd>'` to run a command).
 
+### Plain Docker (no wrapper)
+
+`pi-run.sh` calls podman. With Docker, use the Dockerfile directly:
+
+```bash
+# once, on a connected machine (in this directory):
+curl -sLO https://github.com/earendil-works/pi/releases/download/v1.4.0/pi-linux-x64.tar.gz
+docker build -t pi-interactive:1.4.0 .
+docker save -o pi-interactive.tar pi-interactive:1.4.0   # carry this tar over
+docker load -i pi-interactive.tar                        # on the restricted machine
+
+# in your project dir — llama.cpp / vLLM on the same host:
+docker run --rm -it --init \
+  --add-host=host.docker.internal:host-gateway \
+  -v "$PWD":/workspace \
+  -v pi-agent-home:/root/.pi/agent \
+  -e PI_LLM_BASE_URL=http://host.docker.internal:8080/v1 \
+  -e PI_LLM_MODEL=halogen-qwen3.8-flash-next \
+  -e PI_LLM_THINKING_FORMAT=qwen-chat-template -e PI_LLM_NO_DEVELOPER_ROLE=1 \
+  pi-interactive:1.4.0
+
+# vLLM on another LAN machine: just change the URL (no --add-host needed)
+#   -e PI_LLM_BASE_URL=http://192.168.1.247:8000/v1 -e PI_LLM_MODEL=Qwen3.8-Flash-Next
+# one-shot: append  pi -p "summarize this repo"  after the image name
+```
+
+Docker differences from the podman setup:
+
+- **`host.docker.internal`** is automatic on Docker Desktop. On Linux Docker Engine it needs the `--add-host=…:host-gateway` line above, and the LLM server must listen on `0.0.0.0` (or the `docker0` IP). A server bound to `127.0.0.1` is unreachable from the bridge. In that case use `--network host` with `http://127.0.0.1:<port>/v1` (Linux only).
+- **File ownership:** with rootful Docker, files pi creates in `/workspace` are owned by root on the host (rootless podman/Docker maps them to you).
+- **SELinux hosts** (Fedora/RHEL): append `:Z` to the workspace mount, as `pi-run.sh` does.
+- All `PI_LLM_*` variables in the table below work the same with `-e`.
+
 ### Environment variables
 
 | Variable | Default | Meaning |
